@@ -1,53 +1,53 @@
-# mk-ai-claude-yt-plugin
+# mk96-ai-claude-yt-plugin
 
-Plugin de Claude Code (`mk-yt`) con herramientas para YouTube. Cada herramienta es una *función* independiente.
+Claude Code plugin (`mk96-yt`) with YouTube tools. Each tool is an independent *feature*.
 
-| Función | Comando | Qué hace |
+| Feature | Command | What it does |
 |---|---|---|
-| shorts | `/mk-yt:shorts <url o ruta>` | Convierte un vídeo largo en shorts verticales 9:16 |
-| shorts | `/mk-yt:shorts-style` | Crea y gestiona estilos: un marco a pantalla completa con ventana para el vídeo y zona de subtítulos |
+| shorts | `/mk96-yt:shorts <url or path>` | Turns a long video into vertical 9:16 shorts |
+| shorts | `/mk96-yt:shorts-style` | Creates and manages styles: a full-screen frame with a video window and a caption area |
 
-## Instalar
+## Install
 ```
-claude plugin marketplace add C:\Users\anbel\Desktop\Repos\mk-ai-claude-yt-plugin
-claude plugin install mk-yt@mk-ai-claude-yt-plugin
+claude plugin marketplace add mk96-ai/mk96-ai-claude-yt-plugin
+claude plugin install mk96-yt@mk96-ai-claude-yt-plugin
 ```
-Para probarlo sin instalar: `claude --plugin-dir C:\Users\anbel\Desktop\Repos\mk-ai-claude-yt-plugin`.
+To try it without installing: `claude --plugin-dir <path to this repository>`.
 
-## Primera vez en un equipo
+## First run on a machine
 ```
-python core/mkyt.py setup          # entorno Python + modelos (--cpu si no hay GPU NVIDIA)
-python core/mkyt.py doctor         # comprueba ffmpeg, node, NVENC, dependencias y modelos
+python core/mk96yt.py setup        # Python environment + models (--cpu if there is no NVIDIA GPU)
+python core/mk96yt.py doctor       # checks ffmpeg, node, NVENC, dependencies and models
 ```
-Requisitos: Python 3.10+, ffmpeg/ffprobe en el PATH, Node.js (solo para YouTube).
+Requirements: Python 3.10+, ffmpeg/ffprobe on the PATH, Node.js (YouTube downloads only).
 
-## Arquitectura
+## Architecture
 ```
-.claude-plugin/        plugin.json, marketplace.json
-core/                  infraestructura común (solo biblioteca estándar, sin lógica de ninguna función)
-  mkyt.py              punto de entrada: setup | doctor | features | <función> <orden>
-  mkyt_core/           paths, jsonio, config (capas), proc, features (descubrimiento), setup, doctor, cli
-skills/<función>/      una carpeta por función; el núcleo la descubre por su feature.json
-  SKILL.md             flujo que sigue Claude (define el comando /mk-yt:<función>)
-  feature.json         dependencias, modelos y herramientas de sistema que necesita
-  defaults.json        ajustes por defecto
-  src/mkyt_<función>/
-    commands/          una orden por archivo (capa de entrada: argumentos y salida)
-    services/          lógica con efectos (ffmpeg, audio, detección, transcripción...)
-    domain/            reglas puras (idioma, línea de tiempo, transcripción, lienzo)
-    settings.py        carga de ajustes por capas
-skills/shorts-style/   solo SKILL.md: comando de la función shorts para gestionar estilos (el código está en shorts)
+.claude-plugin/          plugin.json, marketplace.json
+core/                    shared infrastructure (standard library only, no feature logic)
+  mk96yt.py              entry point: setup | doctor | features | <feature> <command>
+  mk96yt_core/           paths, jsonio, config (layers), proc, features (discovery), setup, doctor, cli
+skills/<feature>/        one folder per feature; the core discovers it through its feature.json
+  SKILL.md               workflow Claude follows (defines the /mk96-yt:<feature> command)
+  feature.json           dependencies, models and system tools it needs
+  defaults.json          default settings
+  src/mk96yt_<feature>/
+    commands/            one command per file (entry layer: arguments and output)
+    services/            logic with side effects (ffmpeg, audio, detection, transcription...)
+    domain/              pure rules (language, timeline, transcript, canvas)
+    settings.py          layered settings loading
+skills/shorts-style/     SKILL.md only: shorts command to manage styles (the code lives in shorts)
 ```
-Dependencias: `commands` → `services` → `domain`, y todo → `mkyt_core`. Nada depende hacia arriba.
+Dependencies: `commands` → `services` → `domain`, and everything → `mk96yt_core`. Nothing depends upwards.
 
-### Añadir una función nueva (p. ej. publicar)
-1. Crear `skills/publish/` con `SKILL.md` (aparece como `/mk-yt:publish`), `feature.json` y `src/mkyt_publish/commands/<orden>.py`.
-2. Listo: `mkyt setup`, `mkyt doctor` y `mkyt publish <orden>` la reconocen sin tocar `core/`.
+### Adding a new feature (e.g. publish)
+1. Create `skills/publish/` with `SKILL.md` (shows up as `/mk96-yt:publish`), `feature.json` and `src/mk96yt_publish/commands/<command>.py`.
+2. Done: `mk96yt setup`, `mk96yt doctor` and `mk96yt publish <command>` pick it up without touching `core/`.
 
-## Dónde guarda cosas (variables de entorno opcionales)
-| Variable | Contenido | Por defecto |
+## Where files are stored (optional environment variables)
+| Variable | Contents | Default |
 |---|---|---|
-| `MKYT_HOME` | entorno Python, modelos, ajustes `<función>.json` | `~/.mk-yt` |
-| `MKYT_WORKSPACE` | `input/` y `work/<id>/` | `<HOME>/workspace` |
-| `MKYT_OUT` | entrega `<id>/short_<n>.mp4`, `publicar.md`, `panel.md` | `<WORKSPACE>/output` |
-| `MKYT_PYTHON` | intérprete ya preparado en vez del entorno propio | (sin definir) |
+| `MK96YT_HOME` | Python environment, models, `<feature>.json` settings | `~/.mk96-yt` |
+| `MK96YT_WORKSPACE` | `input/` and `work/<id>/` | `<HOME>/workspace` |
+| `MK96YT_OUT` | delivery: `<id>/short_<n>.mp4`, `publicar.md`, `panel.md` | `<WORKSPACE>/output` |
+| `MK96YT_PYTHON` | ready-made interpreter to use instead of the plugin's own environment | (unset) |

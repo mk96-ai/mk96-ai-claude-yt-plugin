@@ -1,11 +1,11 @@
 {
-  "name": "mk-ai-claude-yt-plugin",
+  "name": "mk96-ai-claude-yt-plugin",
   "owner": { "name": "Markes96" },
   "plugins": [
     {
-      "name": "mk-yt",
+      "name": "mk96-yt",
       "source": "./",
-      "description": "Herramientas para YouTube: shorts verticales a partir de cualquier vídeo largo."
+      "description": "YouTube tools: vertical shorts from any long video."
     }
   ]
 }
